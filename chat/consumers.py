@@ -1,10 +1,15 @@
 # chat/consumers.py
 import json
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
+#from asgiref.sync import async_to_sync
+#from channels.generic.websocket import WebsocketConsumer
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
+from channels.generic.websocket import AsyncWebsocketConsumer #Rewrite the consumer to be asynchronous
+
+class ChatConsumer(AsyncWebsocketConsumer):
+    '''
+    ChatConsumer now inherits from AsyncWebsocketConsumer rather than WebsocketConsumer
+    '''
+    async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         '''
         consumer에게 WebSocket 연결을 연 chat/routing.py의 URL 경로에서 'room_name' 매개 변수를 가져옵니다.
@@ -17,7 +22,7 @@ class ChatConsumer(WebsocketConsumer):
         '''
 
         # Join room group
-        async_to_sync(self.channel_layer.group_add)(
+        await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
@@ -27,16 +32,16 @@ class ChatConsumer(WebsocketConsumer):
         group 이름은 ASCII 영숫자, 하이픈 및 마침표로만 제한됩니다
         '''
 
-        self.accept()
+        await self.accept()
         '''
         WebSocket 연결을 수락합니다.
         connect() 메서드 내에서 accept()을 호출하지 않으면 연결이 거부되고 닫힙니다. 예를 들어 요청한 사용자에게 요청된 작업을 수행할 수 있는 권한이 없기 때문에 연결을 거부할 수 있습니다.
         연결을 수락하도록 선택한 경우 accept()를 connect()의 마지막 작업으로 호출하는 것이 좋습니다.
         '''
 
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
+        await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
@@ -45,12 +50,12 @@ class ChatConsumer(WebsocketConsumer):
         '''
 
     # Receive message from WebSocket
-    def receive(self, text_data):
+    async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
+        await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
@@ -63,13 +68,17 @@ class ChatConsumer(WebsocketConsumer):
         '''
 
     # Receive message from room group
-    def chat_message(self, event):
+    async def chat_message(self, event):
         message = event['message']
 
         # Send message to WebSocket
-        self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps({
             'message': message
         }))
+
+    '''All methods are async def rather than just def.'''
+    '''await is used to call asynchronous functions that perform I/O.'''
+    '''async_to_sync is no longer needed when calling methods on the channel layer.'''
 
 """
 사용자가 메시지를 게시하면 JavaScript 기능은 WebSocket을 통해 Chat Consumer로 메시지를 전송합니다.
