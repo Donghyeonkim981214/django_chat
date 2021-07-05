@@ -4,6 +4,9 @@ import json
 #from channels.generic.websocket import WebsocketConsumer
 
 from channels.generic.websocket import AsyncWebsocketConsumer #Rewrite the consumer to be asynchronous
+from asgiref.sync import sync_to_async
+
+from .models import Message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     '''
@@ -53,13 +56,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
+        username = text_data_json['username']
+        room = text_data_json['room']
+
+        await self.save_message(username, room, message)
 
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': message,
+                'username': username
             }
         )
         '''
@@ -82,10 +90,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     '''await is used to call asynchronous functions that perform I/O.'''
     '''async_to_sync is no longer needed when calling methods on the channel layer.'''
 
+    @sync_to_async
+    def save_message(self, username, room, message):
+        Message.objects.create(username=username, room=room, content=message)
+
 """
 사용자가 메시지를 게시하면 JavaScript 기능은 WebSocket을 통해 Chat Consumer로 메시지를 전송합니다.
 Chat Consumer는 이 메시지를 수신하여 room name에 해당하는 group으로 전달합니다.
 그러면 동일한 group(따라서 같은 room에 있는)의 모든 채팅 consumer가 메시지를 받게 됩니다.
 웹 소켓을 통해 다시 JavaScript로 전달하면 채팅 로그에 추가됩니다.
-로그에 추가될 뿐 데이터베이스에 저장되지 않아 새로고침을 하면 로그는 전부 지워진다.
 """
