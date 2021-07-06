@@ -75,10 +75,10 @@ WSGI_APPLICATION = 'config.wsgi.application' #this will be used for serving the 
 ASGI_APPLICATION = 'config.asgi.application' #this will be used for serving the sokets
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
     },
 }
