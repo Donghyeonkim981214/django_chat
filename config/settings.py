@@ -74,11 +74,11 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'config.wsgi.application' #this will be used for serving the templates
-ASGI_APPLICATION = 'core.routing.application' #this will be used for serving the sokets
+ASGI_APPLICATION = 'config.routing.application' #this will be used for serving the sokets
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels_redis.config.RedisChannelLayer",
         "CONFIG": {
             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
