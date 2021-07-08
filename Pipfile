@@ -9,7 +9,6 @@ channels-redis = "*"
 gunicorn = "*"
 django-heroku = "*"
 dj-database-url = "*"
-twisted = {extras = ["http2", "tls"], version = "*"}
 
 [dev-packages]
 
