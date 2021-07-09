@@ -10,8 +10,8 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 # config/asgi.py
 import os
 
-from django.conf.urls import url
 from django.core.asgi import get_asgi_application
+import chat.routing
 
 # Fetch Django ASGI application early to ensure AppRegistry is populated
 # before importing consumers and AuthMiddlewareStack that may import ORM
@@ -30,8 +30,8 @@ application = ProtocolTypeRouter({
 
     # WebSocket chat handler
     "websocket": AuthMiddlewareStack(
-        URLRouter([
-            url(r"^chat/$", ChatConsumer.as_asgi()),
-        ])
+        URLRouter(
+            chat.routing.websocket_urlpatterns
+            )
     ),
 })
