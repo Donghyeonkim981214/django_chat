@@ -73,7 +73,7 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'config.wsgi.application' #this will be used for serving the templates
-ASGI_APPLICATION = 'config.routing.application' #this will be used for serving the sokets
+ASGI_APPLICATION = 'config.asgi.application' #this will be used for serving the sokets
 
 CHANNEL_LAYERS = {
     "default": {
