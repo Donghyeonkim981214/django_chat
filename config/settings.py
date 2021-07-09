@@ -77,7 +77,7 @@ ASGI_APPLICATION = 'config.routing.application' #this will be used for serving t
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.config.RedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
