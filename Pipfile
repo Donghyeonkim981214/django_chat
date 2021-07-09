@@ -9,6 +9,7 @@ channels-redis = "*"
 gunicorn = "*"
 django-heroku = "*"
 dj-database-url = "*"
+asgi-redis = "*"
 
 [dev-packages]
 
